@@ -1,0 +1,38 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+
+version: '3.7'
+services:
+
+  # Database Service (Mysql)
+  mysql-db:
+    image: mysql:8.0.18
+    hostname: mysql
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: "currencyconventer"
+      MYSQL_ROOT_PASSWORD: "root"
+    ports:
+      - "3306:3306"
+    volumes:
+      - my-db-volume:/var/lib/mysql
+
+  # Spring RESTful App (Spring Boot)
+  spring-app:
+    image: bieluu/currencyconventer:externaldb
+    restart: always
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+    environment:
+      SPRING.DATASOURCE.URL: "jdbc:mysql://mysql-db:3306/currencyconventer?useSSL=false&allowPublicKeyRetrieval=true"
+      SPRING.DATASOURCE.USERNAME: "root"
+      SPRING.DATASOURCE.PASSWORD: "root"
+      SPRING.DATASOURCE.DRIVERCLASSNAME: "com.mysql.cj.jdbc.Driver"
+      SPRING.JPA.HIBERNATE.DDL-AUTO: "update"
+      SPRING.JPA.DATABASE-PLATFORM: "org.hibernate.dialect.MySQL8Dialect"
+    depends_on:
+      - mysql-db
+volumes:
+  my-db-volume:
